@@ -148,24 +148,3 @@ for(i in seq(1,5,1)) {
   filename <- paste0('one_hot_encoded768_group',i,'.csv')
   write.csv(tmp.data, filename, row.names = FALSE)
 }
-
-
-
-# fuck I've got duplicate comments??
-jojo <- all_comments %>%
-  group_by(msg_id) %>%
-  count(n=n())
-jojo2 <- all_comments %>% filter(msg_id==115)
-# sanity check 
-nrow(one_hot_encoded300)
-length(unique(one_hot_encoded300$msg_id))
-
-length(unique(all_comments$msg_id))
-
-jojo <- all_comments %>% filter(!(msg_id %in% one_hot_encoded300$msg_id))
-
-my_row <- data.frame(example=1, gandalf=1, hate=1, love=1, luke=1, skywalker=1)
-my_row <- rbind(my_row, data.frame(example=2, gandalf=1, hate=1, love=1, luke=1, skywalker=1))
-
-
-
