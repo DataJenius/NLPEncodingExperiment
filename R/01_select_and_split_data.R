@@ -56,8 +56,9 @@ clean_it_up <- function(df) {
 
 #######################################################
 # clean up our comments
-clean_comments_sw <- clean_it_up(raw_comments_sw)
-clean_comments_lotr <- clean_it_up(raw_comments_lotr)
+clean_comments <- clean_it_up(rbind(raw_comments_sw, raw_comments_lotr)) # clean all at once so everyone gets a unique msg_id
+clean_comments_sw <- clean_comments %>% filter(label==0)
+clean_comments_lotr <- clean_comments %>% filter(label==1)
 
 
 #######################################################
