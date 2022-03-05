@@ -162,7 +162,7 @@ length(unique(one_hot_encoded300$msg_id))
 
 length(unique(all_comments$msg_id))
 
-jojo <- all_comments %>% filter((msg_id %in% one_hot_encoded300$msg_id))
+jojo <- all_comments %>% filter(!(msg_id %in% one_hot_encoded300$msg_id))
 
 my_row <- data.frame(example=1, gandalf=1, hate=1, love=1, luke=1, skywalker=1)
 my_row <- rbind(my_row, data.frame(example=2, gandalf=1, hate=1, love=1, luke=1, skywalker=1))
