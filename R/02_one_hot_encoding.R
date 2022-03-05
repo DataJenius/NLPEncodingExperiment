@@ -8,11 +8,13 @@ set.seed(42)
 library(tidyverse)
 library(tidytext)
 
+
 ############################################################
 # load our TRAINING data from github (groups 1, 2, 3)
 comments <- read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/comments/selected/selected_reddit_comments_group1.csv") %>%
   rbind(read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/comments/selected/selected_reddit_comments_group2.csv")) %>%
   rbind(read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/comments/selected/selected_reddit_comments_group3.csv"))
+
 
 ############################################################
 # define our stopwords and make unigrams from clean_text
@@ -21,12 +23,14 @@ unigrams <- comments %>%
   unnest_tokens(token, clean_text) %>%
   filter(!(token %in% words_to_ignore))
 
+
 ################################################################
 # find most important tokens according to document frequency
 tokens_by_df <- unigrams %>%
   group_by(token) %>%
   summarise(total_df=length(unique(msg_id))) %>%
   arrange(desc(total_df))
+
 
 ############################################################
 # which tokens are popular in which group?
@@ -50,6 +54,7 @@ combined <- tokens_lotr %>%
   mutate(freq_lort=ifelse(is.na(freq_lort),0,freq_lort)) %>%
   mutate(total=freq_sw+freq_lort) %>%
   mutate(bias=freq_lort-freq_sw)
+
 
 ############################################################
 # visualize a few cherry-picked examples
