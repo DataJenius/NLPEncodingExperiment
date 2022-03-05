@@ -112,9 +112,35 @@ all_comments_one_hot_encoded300 <- all_comments %>%
 # save as 5 different CSV files so they fit on github
 for(i in seq(1,5,1)) {
   print(i)
-  tmp.data <- all_comments_final %>%
+  tmp.data <- all_comments_one_hot_encoded300 %>%
     filter(my_group==i) 
   filename <- paste0('one_hot_encoded300_group',i,'.csv')
+  write.csv(tmp.data, filename, row.names = FALSE)
+}
+
+
+
+############################################################
+# get one-hot encoded data using top 768 tokens 
+one_hot_encoded768 <- all_unigrams %>%
+  filter(token %in% top768_tokens$token) %>%
+  group_by(msg_id, token) %>%
+  summarise(value=1) %>%
+  select(msg_id, token, value) %>%
+  spread(token, value, fill=0)
+
+# combine encoding with other comment features
+all_comments_one_hot_encoded768 <- all_comments %>%
+  select(msg_id, token_count, my_group, my_role, label) %>%
+  left_join(one_hot_encoded768, by="msg_id") %>%
+  mutate_if(is.numeric,coalesce,0)
+
+# save as 5 different CSV files so they fit on github
+for(i in seq(1,5,1)) {
+  print(i)
+  tmp.data <- all_comments_one_hot_encoded768 %>%
+    filter(my_group==i) 
+  filename <- paste0('one_hot_encoded768_group',i,'.csv')
   write.csv(tmp.data, filename, row.names = FALSE)
 }
 
