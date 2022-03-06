@@ -139,7 +139,7 @@ encode_comment_with_custom_word_embeddings <- function(comments, unigrams, word_
   encoded_comments <- data.frame()
   
   # how many dimensions does our embedding have?
-  dimensions = ncol(custom.word.vectors300) 
+  dimensions = ncol(word_emdedding) 
   
   # cycle through comments
   for(i in 1:nrow(comments)) {
@@ -209,8 +209,8 @@ encode_comment_with_custom_word_embeddings <- function(comments, unigrams, word_
 }
 
 # encode our comments 
-encoded300 <- encode_comment_with_custom_word_embeddings(all_comments, all_unigrams, custom.word.vectors300) # 16 minutes
-#encoded768 <- encode_comment_with_custom_word_embeddings(all_comments, all_unigrams, custom.word.vectors768)
+#encoded300 <- encode_comment_with_custom_word_embeddings(all_comments, all_unigrams, custom.word.vectors300) # 16 minutes
+encoded768 <- encode_comment_with_custom_word_embeddings(all_comments, all_unigrams, custom.word.vectors768)
 
 
 # save as 5 different CSV files so they fit on github
@@ -223,197 +223,18 @@ for(i in seq(1,5,1)) {
 }
 
 
-
-
-
-tic()
-encoded_comments <- data.frame()
-for(i in 1:nrow(final.comments)) {
-  print(i)
-  
-  # get details of this comment
-  my_msg_id <- final.comments[i,"msg_id"]
-  my_val_group <- final.comments[i,"val_group"]
-  my_label <- final.comments[i,"label"]
-  
-  # get all tokens associate to this comment
-  my_comment_tokens <- comment_tokens %>% filter(msg_id==my_msg_id)
-  
-  # special rule if we do not have tokens for this comment
-  if(nrow(my_comment_tokens)==0) {
-    
-    # add vector of all 0's since we have no other information
-    my_sentence_embedding <- rotate_df(data.frame(idx=paste0("dim",seq(1,768,1)), value=0) %>% select(-idx)) 
-    rownames(my_sentence_embedding) <- c(my_msg_id)
-    colnames(my_sentence_embedding) <- paste0("dim",seq(1,768,1))
-    
-    # make wide and add other needed fields
-    my_encoded_comment <- data.frame(msg_id=my_msg_id, val_group=my_val_group, label=my_label)
-    rownames(my_encoded_comment) <- c(my_msg_id)
-    my_encoded_comment <- my_encoded_comment %>% cbind(my_sentence_embedding)
-    encoded_comments <- encoded_comments %>% rbind(my_encoded_comment)
-  }
-  
-  # we have tokens for this comment
-  if(nrow(my_comment_tokens)>0) {
-    
-    # add the vectors for each token as a new column
-    my_comment_vectors <- data.frame(idx=paste0("dim",seq(1,768,1)))
-    for(j in 1:nrow(my_comment_tokens)) {
-      my_token <- my_comment_tokens[j,"token"]
-      my_vector <- word.vectors[my_token,]
-      col_name <- paste0(my_token,j)
-      my_comment_vectors[[col_name]] <- my_vector
-    }
-    
-    # add the rownames to debug more easily
-    rownames(my_comment_vectors) <- paste0("dim",seq(1,768,1))
-    
-    # create a sentence embedding by taking the mean of all 768 dimensions
-    my_sentence_embedding <- rotate_df(data.frame(val=rowMeans(my_comment_vectors %>% select(-idx), na.rm=TRUE)))
-    rownames(my_sentence_embedding) <- c(my_msg_id)
-    
-    # add other needed fields to our encoded comment
-    my_encoded_comment <- data.frame(msg_id=my_msg_id, val_group=my_val_group, label=my_label)
-    rownames(my_encoded_comment) <- c(my_msg_id)
-    my_encoded_comment <- my_encoded_comment %>% cbind(my_sentence_embedding)
-    encoded_comments <- encoded_comments %>% rbind(my_encoded_comment)
-  }   
-}
-toc()
-
-
-
-
-
-
-
-baskets.df <- as.data.frame(t(vocab.matrix))
-
-
-
-
-################################################################
-# find most important tokens according to document frequency
-tokens_by_df <- unigrams %>%
-  group_by(token) %>%
-  summarise(total_df=length(unique(msg_id))) %>%
-  arrange(desc(total_df))
-
-
-############################################################
-# which tokens are popular in which group?
-tokens_sw <- unigrams %>%
-  filter(label==0) %>%
-  group_by(token) %>%
-  summarise(total_df=length(unique(msg_id))) %>%
-  arrange(desc(total_df)) %>%
-  rename(freq_sw=total_df)
-
-tokens_lotr <- unigrams %>%
-  filter(label==1) %>%
-  group_by(token) %>%
-  summarise(total_df=length(unique(msg_id))) %>%
-  arrange(desc(total_df)) %>%
-  rename(freq_lort=total_df)
-
-combined <- tokens_lotr %>%
-  left_join(tokens_sw, by="token") %>%
-  mutate(freq_sw=ifelse(is.na(freq_sw),0,freq_sw)) %>%
-  mutate(freq_lort=ifelse(is.na(freq_lort),0,freq_lort)) %>%
-  mutate(total=freq_sw+freq_lort) %>%
-  mutate(bias=freq_lort-freq_sw)
-
-
-############################################################
-# visualize a few cherry-picked examples
-cherry_pick <- c("story","characters","trilogy",
-                 "books","tolkien","frodo",
-                 "luke","episode","mandalorian")
-ggdata <- combined %>%
-  filter(token %in% cherry_pick)
-
-plot <- ggplot(ggdata, aes(x=freq_sw, y=freq_lort, color=bias, label=token)) +
-  geom_point() +
-  geom_text(size=4,nudge_y=30) +
-  xlim(-50, 600) +
-  ylim(-50, 600) +  
-  geom_abline(slope=1, intercept = 0, color="#333333", lty=3) +
-  scale_color_gradient2(
-    low="#db4646",
-    mid = "#333333",
-    high="#4646db"    
-  ) +
-  ggtitle("Document Frequency") +
-  labs(x="/r/StarWars", y="/r/lotr") +
-  theme_bw() +
-  theme(legend.position = "none")
-plot
-
-
-############################################################
-# top 300 and 768 tokens 
-top300_tokens <- tokens_by_df[1:300,"token"]
-top768_tokens <- tokens_by_df[1:768,"token"]
-
-############################################################
-# load all of our comments, including val and test
-all_comments <- comments %>%
-  rbind(read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/comments/selected/selected_reddit_comments_group4.csv")) %>%
-  rbind(read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/comments/selected/selected_reddit_comments_group5.csv"))
-
-############################################################
-# tokenize all comments into unigrams
-all_unigrams <- all_comments %>%
-  unnest_tokens(token, clean_text) %>%
-  filter(!(token %in% words_to_ignore))
-
-############################################################
-# get one-hot encoded data using top 300 tokens 
-one_hot_encoded300 <- all_unigrams %>%
-  filter(token %in% top300_tokens$token) %>%
-  group_by(msg_id, token) %>%
-  summarise(value=1) %>%
-  select(msg_id, token, value) %>%
-  spread(token, value, fill=0)
-
-# combine encoding with other comment features
-all_comments_one_hot_encoded300 <- all_comments %>%
-  select(msg_id, token_count, my_group, my_role, label) %>%
-  left_join(one_hot_encoded300, by="msg_id") %>%
-  mutate_if(is.numeric,coalesce,0)
-
-# save as 5 different CSV files so they fit on github
+# save as 10 different CSV files so they fit on github
 for(i in seq(1,5,1)) {
   print(i)
-  tmp.data <- all_comments_one_hot_encoded300 %>%
-    filter(my_group==i) 
-  filename <- paste0('one_hot_encoded300_group',i,'.csv')
-  write.csv(tmp.data, filename, row.names = FALSE)
-}
-
-
-
-############################################################
-# get one-hot encoded data using top 768 tokens 
-one_hot_encoded768 <- all_unigrams %>%
-  filter(token %in% top768_tokens$token) %>%
-  group_by(msg_id, token) %>%
-  summarise(value=1) %>%
-  select(msg_id, token, value) %>%
-  spread(token, value, fill=0)
-
-# combine encoding with other comment features
-all_comments_one_hot_encoded768 <- all_comments %>%
-  select(msg_id, token_count, my_group, my_role, label) %>%
-  left_join(one_hot_encoded768, by="msg_id") %>%
-  mutate_if(is.numeric,coalesce,0)
-
-# save as 5 different CSV files so they fit on github
-for(i in seq(1,5,1)) {
-  print(i)
-  tmp.data <- all_comments_one_hot_encoded768 %>%
-    filter(my_group==i) 
-  filename <- paste0('one_hot_encoded768_group',i,'.csv')
-  write.csv(tmp.data, filename, row.names = FALSE)
+  
+  # save first 1000 in A
+  tmp.data <- encoded768 %>% filter(my_group==i) 
+  tmp.dataA <- tmp.data[1:1000,]
+  filenameA <- paste0('custom_encoded768_group',i,'A.csv')  
+  write.csv(tmp.dataA, filenameA, row.names = FALSE)
+  
+  # save second 1000 in B  
+  tmp.dataB <- tmp.data[1001:nrow(tmp.data),]
+  filenameB <- paste0('custom_encoded768_group',i,'B.csv')    
+  write.csv(tmp.dataB, filenameB, row.names = FALSE)
 }
