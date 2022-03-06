@@ -63,8 +63,10 @@ vocab.prob <- vocab.pair %>%
 # visualize matrix as df
 viz <- vocab.prob %>%
   spread(context_token, prob, fill=0)
-
-
+sample_vector <- rotate_df(viz %>% filter(target_token=="skywalker"))
+colnames(sample_vector) <- c("skywalker")
+sample_vector <- sample_vector %>% filter(skywalker!="skywalker")
+ 
 ############################################################
 # cast to sparse matrix
 tic()
@@ -107,14 +109,26 @@ find_similar_tokens <- function(target_vector, matrix) {
                       cosine_sim(target_vector, y))
   out <- as.data.frame(cos_sims, row.names = rownames(cos_sims), stringsAsFactors=FALSE) %>%
     tibble::rownames_to_column("context_token") %>%
-    select(context_token, target_token := cos_sims) %>%
-    arrange(-target_token)
+    select(context_token, similarity := cos_sims) %>%
+    arrange(-similarity) %>%
+    mutate(rank = row_number())
 }
 
-check1 <- find_similar_tokens(custom.word.vectors300["luke",],custom.word.vectors300) %>% mutate(row_id = row_number())
-check2 <- find_similar_tokens(custom.word.vectors768["luke",],custom.word.vectors768) %>% mutate(row_id = row_number())
+check1 <- find_similar_tokens(custom.word.vectors300["luke",],custom.word.vectors300) 
+check2 <- find_similar_tokens(custom.word.vectors300["skywalker",],custom.word.vectors300) 
+check3 <- find_similar_tokens(custom.word.vectors300["gandalf",],custom.word.vectors300) 
+#check2 <- find_similar_tokens(custom.word.vectors768["luke",],custom.word.vectors768) %>% mutate(row_id = row_number())
 
+# visualize for the article
+viz <- data.frame(skywalker=custom.word.vectors300["skywalker",])
 
+viz_example <- data.frame(love=custom.word.vectors300["love",],
+                     luke=custom.word.vectors300["luke",],
+                     skywalker=custom.word.vectors300["skywalker",],
+                     hate=custom.word.vectors300["hate",],
+                     gandalf=custom.word.vectors300["gandalf",],
+                     grey=custom.word.vectors300["grey",])
+rownames(viz_example) <- paste0("dim",seq(1,300,1))
 
 #####################################################################################################
 # load up all of our comments so we can encode everything
@@ -210,7 +224,7 @@ encode_comment_with_custom_word_embeddings <- function(comments, unigrams, word_
 
 # encode our comments 
 #encoded300 <- encode_comment_with_custom_word_embeddings(all_comments, all_unigrams, custom.word.vectors300) # 16 minutes
-encoded768 <- encode_comment_with_custom_word_embeddings(all_comments, all_unigrams, custom.word.vectors768)
+encoded768 <- encode_comment_with_custom_word_embeddings(all_comments, all_unigrams, custom.word.vectors768) # 63 minutes
 
 
 # save as 5 different CSV files so they fit on github
