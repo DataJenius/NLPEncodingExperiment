@@ -225,6 +225,7 @@ for(i in seq(1,5,1)) {
 
 
 
+
 tic()
 encoded_comments <- data.frame()
 for(i in 1:nrow(final.comments)) {
