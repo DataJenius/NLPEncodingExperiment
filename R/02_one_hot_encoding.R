@@ -7,6 +7,7 @@ set.seed(42)
 # load dependencies
 library(tidyverse)
 library(tidytext)
+library(ggplot2)
 
 
 ############################################################
