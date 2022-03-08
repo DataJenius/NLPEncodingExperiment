@@ -6,24 +6,6 @@ set.seed(42)
 # load dependencies
 library(tidyverse)
 
-############################################################
-# load our TESTING data from github (groups 5)
-testing_data <- read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/comments/selected/selected_reddit_comments_group5.csv") 
-
-############################################################
-# load our RESULTS
-results <- read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_one-hot-(300).csv") 
-
-############################################################
-# sanity check we tested what we thought we did
-check1 <- testing_data %>% filter(msg_id %in% results$msg_id) # 2000
-check2 <- results %>% filter(msg_id %in% testing_data$msg_id) # 2000
-
-############################################################
-# visualize all of our RESULTS side-by-side
-results <- read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_one-hot-(300).csv") 
-
-
 
 ############################################################
 ############################################################
@@ -55,7 +37,7 @@ results <- rbind(results, get_results("custom (300) 100", "custom", 300, 301, 10
 results <- rbind(results, get_results("custom (300) 1,000", "custom", 300, 301, 1000, "https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_custom-(300)_1000_epochs.csv"))
 results <- rbind(results, get_results("custom (768) 100", "custom", 768, 769, 100, "https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_custom-(768).csv"))
 results <- rbind(results, get_results("custom (768) 1,000", "custom",  768, 769, 1000, "https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_custom-(768)_1000_epochs.csv"))
-results <- rbind(results, get_results("BERT (768) 1", "BERT",  768, 109483778, 1000, "https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_custom-(768)_1000_epochs.csv"))
+results <- rbind(results, get_results("BERT (768) 1", "BERT",  768, 109483778, 1000, "https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_BERT-(768)_1_epoch.csv"))
 #results$inputs <- factor(results$inputs, levels=c("300","768"))
 #results$epochs <- factor(results$epochs, levels=c("100","1000"))
 
@@ -82,8 +64,8 @@ my_colors <- c("one-hot"="#BF7D2C",
 
 show_items <- c(
                 "one-hot (300) 100",
-                "one-hot (768) 100",
-                "word2vec (300) 100"
+                "one-hot (768) 100"
+                #"word2vec (300) 100",
                 #"word2vec (300) 1,000",
                 #"custom (300) 100",
                 #"custom (300) 1,000",
@@ -105,7 +87,7 @@ plot1 <- ggplot(ggdata, aes(y=reorder(name,accuracy), x=accuracy, fill=method, l
   scale_x_continuous(labels=percent, limits=my_limits, oob = rescale_none) +
   scale_fill_manual(name=" ",
                     values = my_colors)
-plot1
+#plot1
 
 # prec
 #my_limits <- c(0.85, max(ggdata$prec)+0.00)
@@ -119,7 +101,7 @@ plot2 <- ggplot(ggdata %>% mutate(prec=round(prec,4)), aes(y=reorder(name,prec),
   scale_x_continuous(labels=percent, limits=my_limits, oob = rescale_none) +
   scale_fill_manual(name=" ",
                     values = my_colors)
-plot2
+#plot2
 
 # recall
 #my_limits <- c(0.85, max(ggdata$recall)+0.00)
@@ -133,14 +115,8 @@ plot3 <- ggplot(ggdata %>% mutate(recall=round(recall,4)), aes(y=reorder(name,re
   scale_x_continuous(labels=percent, limits=my_limits, oob = rescale_none) +
   scale_fill_manual(name=" ",
                     values = my_colors)
-plot3
+#plot3
 
-
-
-#!!!!!!!!
-# I still don't love the colors; use something other than green and red
-# set range 85% to 100%
-  
 # plot all 3 together
 grid.arrange(plot1, plot2, plot3, nrow = 1)
 
@@ -158,7 +134,7 @@ results.compare <- read.csv("https://raw.githubusercontent.com/DataJenius/NLPEnc
   left_join(read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_custom-(300)_1000_epochs.csv") %>% mutate(custom300b_correct=correct, p6=p_sigmoid) %>% select(msg_id, custom300b_correct, p6), by="msg_id") %>%
   left_join(read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_custom-(768).csv") %>% mutate(custom768_correct=correct, p7=p_sigmoid) %>% select(msg_id, custom768_correct, p7), by="msg_id") %>%
   left_join(read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_custom-(768)_1000_epochs.csv") %>% mutate(custom768b_correct=correct, p8=p_sigmoid) %>% select(msg_id, custom768b_correct, p8), by="msg_id") %>%
-  left_join(read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_custom-(768)_1000_epochs.csv") %>% mutate(bert_correct=correct, p9=p_sigmoid) %>% select(msg_id, bert_correct, p9), by="msg_id") %>%
+  left_join(read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_BERT-(768)_1_epoch.csv") %>% mutate(bert_correct=correct, p9=p_sigmoid) %>% select(msg_id, bert_correct, p9), by="msg_id") %>%
   mutate(total_correct = onehot300_correct+onehot768_correct+word2vec300_correct+word2vec300b_correct+custom300_correct+custom300b_correct+custom768_correct+custom768b_correct+bert_correct) %>%
   mutate(avg_p = (p1+p2+p3+p4+p5+p6+p7+p8+p9)/9)
 
@@ -169,6 +145,8 @@ comments <- read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingEx
 # examples everyone got right
 everyone_right <- results.compare %>% filter(total_correct==9) %>% left_join(comments, by="msg_id")
 everyone_wrong <- results.compare %>% filter(total_correct==0) %>% left_join(comments, by="msg_id")
+
+sanity_check <- results.compare %>% filter(msg_id==17480) %>% left_join(comments, by="msg_id")
 
 # example that confused it
 confused <- results.compare %>% filter(avg_p > 0.3) %>% filter(avg_p < 0.7) %>% left_join(comments, by="msg_id")
@@ -184,7 +162,7 @@ results.sigmoids <- read.csv("https://raw.githubusercontent.com/DataJenius/NLPEn
   rbind(read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_custom-(300)_1000_epochs.csv") %>% mutate(method='custom (300) 1,000') %>% select(msg_id, method, p_sigmoid, correct)) %>%
   rbind(read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_custom-(768).csv") %>% mutate(method='custom (768) 100') %>% select(msg_id, method, p_sigmoid, correct)) %>%
   rbind(read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_custom-(768)_1000_epochs.csv") %>% mutate(method='custom (768) 1,000') %>% select(msg_id, method, p_sigmoid, correct)) %>%
-  rbind(read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_custom-(768)_1000_epochs.csv") %>% mutate(method='BERT (768) 1') %>% select(msg_id, method, p_sigmoid, correct)) %>%
+  rbind(read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/output/results_BERT-(768)_1_epoch.csv") %>% mutate(method='BERT (768) 1') %>% select(msg_id, method, p_sigmoid, correct)) %>%
   mutate(my_color=ifelse(correct==1,"green","red"))
 
 results.sigmoids$method <- factor(results.sigmoids$method, c(
@@ -207,6 +185,8 @@ my_example <- results.sigmoids %>% filter(msg_id==734) # confusion - SW
 my_example <- results.sigmoids %>% filter(msg_id==22306) # Trekkie
 
 my_example <- results.sigmoids %>% filter(msg_id==46701) # Everyone wrong - SW in LOTR
+
+my_example <- results.sigmoids %>% filter(msg_id==17480) # SW from start of article
 
 
 
@@ -239,3 +219,20 @@ sample_data <- sample_data %>% select(msg_id, token_count, my_group, my_role, la
                                       absolutely, action, actors, dots, wrote, yeah, youre)
 colnames(sample_data) <- c("msg_id", "token_count", "my_group", "my_role", "label",
                            "absolutely", "action", "actors", "...", "wrote","yeah","youre")
+
+
+sample_data <- read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/input/one_hot768/one_hot_encoded768_group1.csv")
+sample_data$dots <- rep("...",2000)
+sample_data <- sample_data %>% select(msg_id, token_count, my_group, my_role, label,
+                                      absolute, absolutely, act, dots, youll, youre, youve)
+colnames(sample_data) <- c("msg_id", "token_count", "my_group", "my_role", "label",
+                           "absolute", "absolutely", "act", "...", "youll","youre","youve")
+
+
+
+sample_data <- read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/input/word2vec300/word2vec_encoded300_group1.csv")
+sample_data$dots <- rep("...",2000)
+sample_data <- sample_data %>% select(msg_id, token_count, my_group, my_role, label,
+                                      dim.1, dim.2, dim.3, dots, dim.300)
+colnames(sample_data) <- c("msg_id", "token_count", "my_group", "my_role", "label",
+                           "dim1", "dim2", "dim3", "...", "dim300")
