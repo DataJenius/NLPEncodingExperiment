@@ -60,13 +60,13 @@ vocab.prob <- vocab.pair %>%
   mutate(prob=ifelse(is.na(prob),0,prob)) %>%
   mutate_if(is.numeric,coalesce,0)
 
-# visualize matrix as df
+# visualize matrix as df to illustrate what is going on here
 viz <- vocab.prob %>%
   spread(context_token, prob, fill=0)
 sample_vector <- rotate_df(viz %>% filter(target_token=="skywalker"))
 colnames(sample_vector) <- c("skywalker")
-sample_vector <- sample_vector %>% filter(skywalker!="skywalker")
- 
+
+
 ############################################################
 # cast to sparse matrix
 tic()

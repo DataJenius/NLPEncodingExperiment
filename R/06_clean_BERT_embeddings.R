@@ -9,9 +9,16 @@ library(tidyverse)
 
 # load the BERT embeddings python gave us
 # not included in the repo because they are too big for github
-bert_embed_raw <- read.csv("R/raw_BERT_embeddings_train.csv") %>%
-  rbind(read.csv("R/raw_BERT_embeddings_test.csv")) %>%
-  rbind(read.csv("R/raw_BERT_embeddings_val.csv"))
+bert_embed_raw <- read.csv("R/BERT_embeddings_i999.csv") %>%
+  rbind(read.csv("R/BERT_embeddings_i1999.csv")) %>%
+  rbind(read.csv("R/BERT_embeddings_i2999.csv")) %>%
+  rbind(read.csv("R/BERT_embeddings_i3999.csv")) %>%
+  rbind(read.csv("R/BERT_embeddings_i4999.csv")) %>%
+  rbind(read.csv("R/BERT_embeddings_i5999.csv")) %>%
+  rbind(read.csv("R/BERT_embeddings_i6999.csv")) %>%
+  rbind(read.csv("R/BERT_embeddings_i7999.csv")) %>%
+  rbind(read.csv("R/BERT_embeddings_i8999.csv")) %>%
+  rbind(read.csv("R/BERT_embeddings_i9999.csv")) 
 
 # give the columns pretty labels
 colnames(bert_embed_raw) <- c(paste0("dim",seq(1,768,1)),"msg_id")

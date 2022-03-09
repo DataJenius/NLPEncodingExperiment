@@ -64,13 +64,13 @@ my_colors <- c("one-hot"="#BF7D2C",
 
 show_items <- c(
                 "one-hot (300) 100",
-                "one-hot (768) 100"
-                #"word2vec (300) 100",
-                #"word2vec (300) 1,000",
-                #"custom (300) 100",
-                #"custom (300) 1,000",
-                #"custom (768) 100",
-                #"custom (768) 1,000",
+                "one-hot (768) 100",
+                "word2vec (300) 100",
+                "word2vec (300) 1,000",
+                "custom (300) 100",
+                "custom (300) 1,000",
+                "custom (768) 100",
+                "custom (768) 1,000"
                 #"BERT (768) 1"
                 )
 ggdata <- results %>% filter(name %in% show_items)
@@ -236,3 +236,20 @@ sample_data <- sample_data %>% select(msg_id, token_count, my_group, my_role, la
                                       dim.1, dim.2, dim.3, dots, dim.300)
 colnames(sample_data) <- c("msg_id", "token_count", "my_group", "my_role", "label",
                            "dim1", "dim2", "dim3", "...", "dim300")
+
+
+sample_data <- read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/input/custom300/custom_encoded300_group1.csv")
+sample_data$dots <- rep("...",2000)
+sample_data$dots1 <- rep("0",2000)
+sample_data$dots2 <- rep("0",2000)
+sample_data$dots3 <- rep("0",2000)
+sample_data$dots4 <- rep("0",2000)
+sample_data$dots6 <- rep("0",2000)
+sample_data$dots5 <- rep("...",2000)
+sample_data <- sample_data %>% select(dim6, dim7, dim8, dim9, dim10, dots, dim11, dots1, dots2, dots3, dots5,dots6)
+colnames(sample_data) <- c("i", "love", "ganda","##l", "##f", "...", "skywalker","[UNK]","[PAD]","[PAD]","...","[PAD]")
+jojo = sample_data[1:12,]
+jojo[11,] <- rep("...",12)
+rownames(jojo) <- c(paste0("dim",seq(1,10,1)), "...","dim300")
+
+
