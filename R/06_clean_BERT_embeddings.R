@@ -9,7 +9,7 @@ library(tidyverse)
 
 # load the BERT embeddings python gave us
 # not included in the repo because they are too big for github
-bert_embed_raw <- read.csv("R/BERT_embeddings_i999.csv") %>%
+bert_embed_raw <- read.csv("R/BERT_ft_embeddings_i999.csv") %>%
   rbind(read.csv("R/BERT_ft_embeddings_i1999.csv")) %>%
   rbind(read.csv("R/BERT_ft_embeddings_i2999.csv")) %>%
   rbind(read.csv("R/BERT_ft_embeddings_i3999.csv")) %>%
