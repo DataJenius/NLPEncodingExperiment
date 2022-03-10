@@ -10,15 +10,15 @@ library(tidyverse)
 # load the BERT embeddings python gave us
 # not included in the repo because they are too big for github
 bert_embed_raw <- read.csv("R/BERT_embeddings_i999.csv") %>%
-  rbind(read.csv("R/BERT_embeddings_i1999.csv")) %>%
-  rbind(read.csv("R/BERT_embeddings_i2999.csv")) %>%
-  rbind(read.csv("R/BERT_embeddings_i3999.csv")) %>%
-  rbind(read.csv("R/BERT_embeddings_i4999.csv")) %>%
-  rbind(read.csv("R/BERT_embeddings_i5999.csv")) %>%
-  rbind(read.csv("R/BERT_embeddings_i6999.csv")) %>%
-  rbind(read.csv("R/BERT_embeddings_i7999.csv")) %>%
-  rbind(read.csv("R/BERT_embeddings_i8999.csv")) %>%
-  rbind(read.csv("R/BERT_embeddings_i9999.csv")) 
+  rbind(read.csv("R/BERT_ft_embeddings_i1999.csv")) %>%
+  rbind(read.csv("R/BERT_ft_embeddings_i2999.csv")) %>%
+  rbind(read.csv("R/BERT_ft_embeddings_i3999.csv")) %>%
+  rbind(read.csv("R/BERT_ft_embeddings_i4999.csv")) %>%
+  rbind(read.csv("R/BERT_ft_embeddings_i5999.csv")) %>%
+  rbind(read.csv("R/BERT_ft_embeddings_i6999.csv")) %>%
+  rbind(read.csv("R/BERT_ft_embeddings_i7999.csv")) %>%
+  rbind(read.csv("R/BERT_ft_embeddings_i8999.csv")) %>%
+  rbind(read.csv("R/BERT_ft_embeddings_i9999.csv")) 
 
 # give the columns pretty labels
 colnames(bert_embed_raw) <- c(paste0("dim",seq(1,768,1)),"msg_id")
@@ -43,11 +43,11 @@ for(i in seq(1,5,1)) {
   # save first 1000 in A
   tmp.data <- bert_encoded_comments %>% filter(my_group==i) 
   tmp.dataA <- tmp.data[1:1000,]
-  filenameA <- paste0('bert_encoded768_group',i,'A.csv')  
+  filenameA <- paste0('bert_ft_encoded768_group',i,'A.csv')  
   write.csv(tmp.dataA, filenameA, row.names = FALSE)
   
   # save second 1000 in B  
   tmp.dataB <- tmp.data[1001:nrow(tmp.data),]
-  filenameB <- paste0('bert_encoded768_group',i,'B.csv')    
+  filenameB <- paste0('bert_ft_encoded768_group',i,'B.csv')    
   write.csv(tmp.dataB, filenameB, row.names = FALSE)
 }
