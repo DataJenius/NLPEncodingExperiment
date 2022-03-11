@@ -256,7 +256,7 @@ rownames(jojo) <- c(paste0("dim",seq(1,10,1)), "...","dim300")
 sample_data <- read.csv("https://raw.githubusercontent.com/DataJenius/NLPEncodingExperiment/main/data/input/bert_pt_768/bert_pt_encoded768_group1A.csv")
 sample_data$dots <- rep("...",1000)
 sample_data <- sample_data %>% select(msg_id, token_count, my_group, my_role, label,
-                                      dim.1, dim.2, dim.3, dots, dim.300)
+                                      dim1, dim2, dim3, dots, dim768)
 colnames(sample_data) <- c("msg_id", "token_count", "my_group", "my_role", "label",
-                           "dim1", "dim2", "dim3", "...", "dim300")
+                           "dim1", "dim2", "dim3", "...", "dim768")
 
