@@ -252,3 +252,27 @@ for(i in seq(1,5,1)) {
   filenameB <- paste0('custom_encoded768_group',i,'B.csv')    
   write.csv(tmp.dataB, filenameB, row.names = FALSE)
 }
+
+
+
+#####################################################################################################
+# dig into some specific examples
+#custom.word.vectors300 <- readRDS("r/custom.word.vectors300.Rds")
+check1 <- find_similar_tokens(custom.word.vectors300["ents",],custom.word.vectors300) 
+check2 <- find_similar_tokens(custom.word.vectors300["towers",],custom.word.vectors300) 
+
+check3 <- find_similar_tokens(custom.word.vectors768["mando",],custom.word.vectors768) 
+check4 <- find_similar_tokens(custom.word.vectors768["bobf",],custom.word.vectors768)
+
+my_example <- data.frame(mando=check3$context_token,
+                         sim_mando=check3$similarity,
+                         bobf=check4$context_token,
+                         sim_bobf=check4$similarity,
+                         rank=check4$rank)
+
+custom.word.vectors300 <- readRDS("custom.word.vectors300.Rds")
+luke <- find_similar_tokens(custom.word.vectors300["luke",],custom.word.vectors300)
+gandalf <- find_similar_tokens(custom.word.vectors300["gandalf",],custom.word.vectors300)
+gap <- data.frame(gap=rep(" ",10161))
+colnames(gap) <- c(" ")
+my_example <- cbind(luke, gap, gandalf)

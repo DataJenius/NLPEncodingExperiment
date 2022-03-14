@@ -60,8 +60,9 @@ combined <- tokens_lotr %>%
 ############################################################
 # visualize a few cherry-picked examples
 cherry_pick <- c("story","characters","trilogy",
-                 "books","tolkien","frodo",
+                 "books","book","tolkien","frodo",
                  "luke","episode","mandalorian")
+
 ggdata <- combined %>%
   filter(token %in% cherry_pick)
 
@@ -76,12 +77,18 @@ plot <- ggplot(ggdata, aes(x=freq_sw, y=freq_lort, color=bias, label=token)) +
     mid = "#333333",
     high="#4646db"    
   ) +
-  ggtitle("Document Frequency") +
+  ggtitle("Document Frequency - One-Hot (768) Vocabulary") +
   labs(x="/r/StarWars", y="/r/lotr") +
   theme_bw() +
   theme(legend.position = "none")
 plot
 
+
+jojo <- all_comments_one_hot_encoded768 %>%
+  filter(my_group %in% c(1,2,3)) %>%
+  filter(isnt==1) %>%
+  filter(dont==1)
+mean(jojo$label)
 
 ############################################################
 # top 300 and 768 tokens 
@@ -100,6 +107,8 @@ all_unigrams <- all_comments %>%
   unnest_tokens(token, clean_text) %>%
   filter(!(token %in% words_to_ignore))
 
+
+
 ############################################################
 # get one-hot encoded data using top 300 tokens 
 one_hot_encoded300 <- all_unigrams %>%
@@ -114,6 +123,11 @@ all_comments_one_hot_encoded300 <- all_comments %>%
   select(msg_id, token_count, my_group, my_role, label) %>%
   left_join(one_hot_encoded300, by="msg_id") %>%
   mutate_if(is.numeric,coalesce,0)
+
+jojo <- all_comments_one_hot_encoded300 %>%
+  filter(my_group %in% c(1,2,3)) %>%
+  filter(book==1)
+mean(jojo$label)
 
 # save as 5 different CSV files so they fit on github
 for(i in seq(1,5,1)) {
@@ -149,3 +163,15 @@ for(i in seq(1,5,1)) {
   filename <- paste0('one_hot_encoded768_group',i,'.csv')
   write.csv(tmp.data, filename, row.names = FALSE)
 }
+
+
+
+
+###############################################################
+# digging into some specific examples to see what went wrong
+missing_from_300 <- 
+  top768_tokens
+
+top300_tokens <- tokens_by_df[1:300,"token"]
+top768_tokens <- tokens_by_df[1:768,"token"]
+
